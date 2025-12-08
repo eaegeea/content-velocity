@@ -29,6 +29,7 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
   const prompt = `Visit ${domain}, find their blog, visit it, scrape the last 60 blog posts published. Output in JSON format with an array of objects, each containing "title" and "publishDate" fields. The publishDate should be in ISO 8601 format (YYYY-MM-DD). If you cannot find a blog or cannot access it, return an empty array.`;
 
   console.log(`Starting Anchor Browser scrape for ${domain}...`);
+  const startTime = Date.now();
   
   try {
     const response = await axios.post<AnchorBrowserResponse>(
@@ -76,14 +77,24 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
           'Content-Type': 'application/json',
           'anchor-api-key': apiKey
         },
-        timeout: 600000, // 10 minutes timeout for long-running tasks
+        timeout: 300000, // 5 minutes timeout for Anchor Browser API
         maxContentLength: Infinity,
-        maxBodyLength: Infinity
+        maxBodyLength: Infinity,
+        validateStatus: (status) => status >= 200 && status < 500 // Don't throw on 4xx errors
       }
     );
 
-    console.log(`Anchor Browser task completed for ${domain}`);
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`Anchor Browser task completed for ${domain} in ${duration}s`);
+    
+    // Check for API errors
+    if (response.status >= 400) {
+      console.error(`Anchor Browser API returned ${response.status}:`, response.data);
+      throw new Error(`Anchor Browser API error: ${response.status}`);
+    }
+
     const result = response.data.data.result;
+    console.log(`Result type: ${typeof result}, length: ${typeof result === 'string' ? result.length : 'N/A'}`);
     
     // Try to parse the JSON result
     let parsedResult: any;
