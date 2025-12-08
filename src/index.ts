@@ -13,6 +13,25 @@ app.use(express.json());
 app.use(express.text({ type: 'text/plain' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Root endpoint with API info
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Content Velocity API',
+    version: '1.0.0',
+    endpoints: {
+      health: 'GET /health',
+      analyze: 'POST /analyze-velocity'
+    },
+    usage: {
+      method: 'POST',
+      url: '/analyze-velocity',
+      body: {
+        website_url: 'example.com'
+      }
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
