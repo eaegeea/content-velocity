@@ -144,8 +144,13 @@ app.post('/analyze-velocity', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Content Velocity API ready for Clay integration`);
 });
+
+// Set timeout to 10 minutes for long-running Anchor Browser tasks
+server.timeout = 600000; // 10 minutes
+server.keepAliveTimeout = 610000; // Slightly longer than timeout
+server.headersTimeout = 620000; // Slightly longer than keepAliveTimeout
 
