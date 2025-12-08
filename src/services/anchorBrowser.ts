@@ -93,9 +93,15 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
       throw new Error(`Anchor Browser API error: ${response.status}`);
     }
 
-    const result = response.data.data.result;
+    let result = response.data.data.result;
     console.log(`Result type: ${typeof result}`);
     console.log(`Raw result:`, JSON.stringify(result).substring(0, 500));
+    
+    // Check if result is double-wrapped (has a nested 'result' property)
+    if (result && typeof result === 'object' && result.result) {
+      console.log('Detected double-wrapped result, extracting inner result');
+      result = result.result;
+    }
     
     // Try to parse the JSON result
     let parsedResult: any;
