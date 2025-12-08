@@ -94,23 +94,43 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
     }
 
     const result = response.data.data.result;
-    console.log(`Result type: ${typeof result}, length: ${typeof result === 'string' ? result.length : 'N/A'}`);
+    console.log(`Result type: ${typeof result}`);
+    console.log(`Raw result:`, JSON.stringify(result).substring(0, 500));
     
     // Try to parse the JSON result
     let parsedResult: any;
     try {
       // The result might be a JSON string, try to parse it
-      parsedResult = typeof result === 'string' ? JSON.parse(result) : result;
-    } catch (e) {
-      // If parsing fails, try to extract JSON from the string
-      const jsonMatch = result.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        parsedResult = JSON.parse(jsonMatch[0]);
+      if (typeof result === 'string') {
+        parsedResult = JSON.parse(result);
+      } else if (typeof result === 'object') {
+        parsedResult = result;
       } else {
-        console.warn('Could not parse result as JSON:', result);
+        console.warn('Unexpected result type:', typeof result);
+        return { blogTitle: null, posts: [] };
+      }
+    } catch (e) {
+      console.error('JSON parse error:', e);
+      // If parsing fails, try to extract JSON from the string
+      if (typeof result === 'string') {
+        const jsonMatch = result.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            parsedResult = JSON.parse(jsonMatch[0]);
+          } catch (e2) {
+            console.error('Failed to parse extracted JSON:', e2);
+            return { blogTitle: null, posts: [] };
+          }
+        } else {
+          console.warn('Could not find JSON in result:', result.substring(0, 200));
+          return { blogTitle: null, posts: [] };
+        }
+      } else {
         return { blogTitle: null, posts: [] };
       }
     }
+    
+    console.log(`Parsed result has blogTitle: ${!!parsedResult.blogTitle}, posts count: ${Array.isArray(parsedResult.posts) ? parsedResult.posts.length : 0}`);
 
     // Extract blog title and posts from the parsed result
     let blogTitle: string | null = null;
