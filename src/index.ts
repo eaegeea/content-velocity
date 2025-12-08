@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { analyzeContentVelocity } from './services/velocityAnalyzer';
 import { scrapeBlogPosts } from './services/anchorBrowser';
+import { createJob, getJob, updateJob, completeJob, failJob } from './services/jobQueue';
 
 dotenv.config();
 
@@ -53,7 +54,48 @@ app.get('/analyze-velocity', (req, res) => {
   });
 });
 
-// Main Clay integration endpoint
+// Process job in background
+async function processJob(jobId: string, domain: string) {
+  updateJob(jobId, { status: 'processing' });
+  
+  try {
+    console.log(`[${jobId}] Starting Anchor Browser scrape for ${domain}...`);
+    const scrapeResult = await scrapeBlogPosts(domain);
+    console.log(`[${jobId}] Scrape completed. Found ${scrapeResult.posts.length} posts`);
+
+    const blogFound = (scrapeResult.posts && scrapeResult.posts.length > 0) || scrapeResult.blogTitle !== null;
+
+    if (!scrapeResult.posts || scrapeResult.posts.length === 0) {
+      completeJob(jobId, {
+        domain,
+        blog_found: blogFound,
+        blog_title: scrapeResult.blogTitle || null,
+        last_30_days_count: 0,
+        previous_30_days_count: 0,
+        velocity_status: 'No posts found',
+        percentage_change: 0
+      });
+      return;
+    }
+
+    const velocityMetrics = analyzeContentVelocity(scrapeResult.posts, scrapeResult.blogTitle);
+
+    completeJob(jobId, {
+      domain,
+      blog_found: true,
+      blog_title: velocityMetrics.blogTitle,
+      last_30_days_count: velocityMetrics.last30DaysCount,
+      previous_30_days_count: velocityMetrics.previous30DaysCount,
+      velocity_status: velocityMetrics.velocityStatus,
+      percentage_change: velocityMetrics.percentageChange
+    });
+  } catch (error: any) {
+    console.error(`[${jobId}] Error:`, error);
+    failJob(jobId, error.message);
+  }
+}
+
+// Main Clay integration endpoint - Async version
 app.post('/analyze-velocity', async (req, res) => {
   try {
     // Handle different input formats from Clay
@@ -98,41 +140,23 @@ app.post('/analyze-velocity', async (req, res) => {
       // If URL parsing fails, use as-is
     }
 
-    console.log(`Analyzing content velocity for domain: ${domain}`);
-    console.log(`[${new Date().toISOString()}] Starting Anchor Browser scrape...`);
+    console.log(`Creating job for domain: ${domain}`);
 
-    // Step 1: Scrape blog posts using Anchor Browser API
-    const scrapeResult = await scrapeBlogPosts(domain);
+    // Create job and start processing in background
+    const jobId = createJob(domain);
     
-    console.log(`[${new Date().toISOString()}] Anchor Browser scrape completed. Found ${scrapeResult.posts.length} posts`);
+    // Start processing asynchronously (don't await)
+    processJob(jobId, domain).catch(err => {
+      console.error(`[${jobId}] Unhandled error:`, err);
+    });
 
-    // Determine if blog was found
-    const blogFound = (scrapeResult.posts && scrapeResult.posts.length > 0) || scrapeResult.blogTitle !== null;
-
-    if (!scrapeResult.posts || scrapeResult.posts.length === 0) {
-      return res.status(200).json({
-        domain,
-        blog_found: blogFound,
-        blog_title: scrapeResult.blogTitle || null,
-        last_30_days_count: 0,
-        previous_30_days_count: 0,
-        velocity_status: 'No posts found',
-        percentage_change: 0
-      });
-    }
-
-    // Step 2: Calculate velocity metrics
-    const velocityMetrics = analyzeContentVelocity(scrapeResult.posts, scrapeResult.blogTitle);
-
-    // Step 3: Return Clay-compatible response
+    // Return immediately with job ID
     res.json({
+      jobId,
       domain,
-      blog_found: true,
-      blog_title: velocityMetrics.blogTitle,
-      last_30_days_count: velocityMetrics.last30DaysCount,
-      previous_30_days_count: velocityMetrics.previous30DaysCount,
-      velocity_status: velocityMetrics.velocityStatus,
-      percentage_change: velocityMetrics.percentageChange
+      status: 'pending',
+      message: 'Job created. Use GET /analyze-velocity/{jobId} to check status.',
+      statusUrl: `/analyze-velocity/${jobId}`
     });
 
   } catch (error: any) {
@@ -142,6 +166,45 @@ app.post('/analyze-velocity', async (req, res) => {
       message: error.message
     });
   }
+});
+
+// Get job status and results
+app.get('/analyze-velocity/:jobId', (req, res) => {
+  const { jobId } = req.params;
+  
+  const job = getJob(jobId);
+  
+  if (!job) {
+    return res.status(404).json({
+      error: 'Job not found',
+      message: `No job found with ID: ${jobId}`
+    });
+  }
+  
+  if (job.status === 'completed') {
+    return res.json({
+      status: 'completed',
+      result: job.result
+    });
+  }
+  
+  if (job.status === 'failed') {
+    return res.status(500).json({
+      status: 'failed',
+      error: job.error
+    });
+  }
+  
+  // Job still processing or pending
+  res.json({
+    status: job.status,
+    message: job.status === 'processing' 
+      ? 'Job is currently processing. Check back in 30-60 seconds.' 
+      : 'Job is queued and will start soon.',
+    jobId: job.id,
+    domain: job.domain,
+    createdAt: job.createdAt
+  });
 });
 
 const server = app.listen(PORT, () => {
