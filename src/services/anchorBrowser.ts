@@ -28,6 +28,8 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
 
   const prompt = `Visit ${domain}, find their blog, visit it, scrape the last 60 blog posts published. Output in JSON format with an array of objects, each containing "title" and "publishDate" fields. The publishDate should be in ISO 8601 format (YYYY-MM-DD). If you cannot find a blog or cannot access it, return an empty array.`;
 
+  console.log(`Starting Anchor Browser scrape for ${domain}...`);
+  
   try {
     const response = await axios.post<AnchorBrowserResponse>(
       'https://api.anchorbrowser.io/v1/tools/perform-web-task',
@@ -74,10 +76,13 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
           'Content-Type': 'application/json',
           'anchor-api-key': apiKey
         },
-        timeout: 300000 // 5 minutes timeout for long-running tasks
+        timeout: 600000, // 10 minutes timeout for long-running tasks
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
       }
     );
 
+    console.log(`Anchor Browser task completed for ${domain}`);
     const result = response.data.data.result;
     
     // Try to parse the JSON result
@@ -133,3 +138,4 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
   }
 }
 
+red if
