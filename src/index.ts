@@ -40,9 +40,13 @@ app.post('/analyze-velocity', async (req, res) => {
     // Step 1: Scrape blog posts using Anchor Browser API
     const scrapeResult = await scrapeBlogPosts(domain);
 
+    // Determine if blog was found
+    const blogFound = (scrapeResult.posts && scrapeResult.posts.length > 0) || scrapeResult.blogTitle !== null;
+
     if (!scrapeResult.posts || scrapeResult.posts.length === 0) {
       return res.status(200).json({
         domain,
+        blog_found: blogFound,
         blog_title: scrapeResult.blogTitle || null,
         last_30_days_count: 0,
         previous_30_days_count: 0,
@@ -57,6 +61,7 @@ app.post('/analyze-velocity', async (req, res) => {
     // Step 3: Return Clay-compatible response
     res.json({
       domain,
+      blog_found: true,
       blog_title: velocityMetrics.blogTitle,
       last_30_days_count: velocityMetrics.last30DaysCount,
       previous_30_days_count: velocityMetrics.previous30DaysCount,
@@ -75,5 +80,6 @@ app.post('/analyze-velocity', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Content Velocity API ready for Clay integration`);
 });
 
