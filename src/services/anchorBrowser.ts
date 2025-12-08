@@ -137,5 +137,3 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
     }
   }
 }
-
-red if
