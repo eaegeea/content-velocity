@@ -99,9 +99,12 @@ app.post('/analyze-velocity', async (req, res) => {
     }
 
     console.log(`Analyzing content velocity for domain: ${domain}`);
+    console.log(`[${new Date().toISOString()}] Starting Anchor Browser scrape...`);
 
     // Step 1: Scrape blog posts using Anchor Browser API
     const scrapeResult = await scrapeBlogPosts(domain);
+    
+    console.log(`[${new Date().toISOString()}] Anchor Browser scrape completed. Found ${scrapeResult.posts.length} posts`);
 
     // Determine if blog was found
     const blogFound = (scrapeResult.posts && scrapeResult.posts.length > 0) || scrapeResult.blogTitle !== null;
