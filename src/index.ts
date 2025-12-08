@@ -8,7 +8,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Custom body parser to handle both JSON and raw text
 app.use(express.json());
+app.use(express.text({ type: 'text/plain' }));
+app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -18,11 +21,31 @@ app.get('/health', (req, res) => {
 // Main Clay integration endpoint
 app.post('/analyze-velocity', async (req, res) => {
   try {
-    const { website_url } = req.body;
+    // Handle different input formats from Clay
+    let website_url: string | undefined;
+    
+    console.log('Request body type:', typeof req.body);
+    console.log('Request body:', req.body);
+    console.log('Content-Type:', req.get('content-type'));
+    
+    // Check if body is a JSON object with website_url
+    if (req.body && typeof req.body === 'object' && !Array.isArray(req.body) && req.body.website_url) {
+      website_url = req.body.website_url;
+    }
+    // Check if body is a plain string (raw body)
+    else if (typeof req.body === 'string') {
+      website_url = req.body.trim().replace(/^["']|["']$/g, ''); // Remove quotes if present
+    }
+    // Check query parameters as fallback
+    else if (req.query.website_url) {
+      website_url = req.query.website_url as string;
+    }
 
     if (!website_url) {
       return res.status(400).json({
-        error: 'website_url is required in the request body'
+        error: 'website_url is required (in body, query parameter, or as raw body)',
+        received_body: req.body,
+        received_type: typeof req.body
       });
     }
 
