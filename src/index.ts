@@ -63,9 +63,14 @@ app.post('/analyze-velocity', async (req, res) => {
     console.log('Request body:', req.body);
     console.log('Content-Type:', req.get('content-type'));
     
-    // Check if body is a JSON object with website_url
+    // Check if body is a JSON object with website_url property
     if (req.body && typeof req.body === 'object' && !Array.isArray(req.body) && req.body.website_url) {
       website_url = req.body.website_url;
+    }
+    // Check if body is an object with numeric keys (Clay's weird format)
+    else if (req.body && typeof req.body === 'object' && !Array.isArray(req.body) && Object.keys(req.body).every(k => !isNaN(Number(k)))) {
+      // Convert object like {"0":"s","1":"p",...} back to string
+      website_url = Object.values(req.body).join('');
     }
     // Check if body is a plain string (raw body)
     else if (typeof req.body === 'string') {
