@@ -26,7 +26,7 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
     throw new Error('ANCHOR_API_KEY environment variable is not set');
   }
 
-  const prompt = `Visit ${domain}, find their blog, visit it, scrape the last 60 blog posts published. Output in JSON format with an array of objects, each containing "title" and "publishDate" fields. The publishDate should be in ISO 8601 format (YYYY-MM-DD). If you cannot find a blog or cannot access it, return an empty array.`;
+  const prompt = `Visit ${domain}, find their blog, visit it, scrape the last 60 blog posts published. These must be most recent blogs, generally in the first few pages of the blog url. Output in JSON format with an array of objects, each containing "title" and "publishDate" fields. The publishDate should be in ISO 8601 format (YYYY-MM-DD). If you cannot find a blog or cannot access it, return an empty array.`;
 
   console.log(`Starting Anchor Browser scrape for ${domain}...`);
   const startTime = Date.now();
