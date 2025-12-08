@@ -37,6 +37,22 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// GET handler for analyze-velocity (returns usage info)
+app.get('/analyze-velocity', (req, res) => {
+  res.status(405).json({
+    error: 'Method Not Allowed',
+    message: 'This endpoint requires POST method',
+    usage: {
+      method: 'POST',
+      url: '/analyze-velocity',
+      body: {
+        website_url: 'example.com'
+      },
+      example_curl: 'curl -X POST https://your-app.railway.app/analyze-velocity -H "Content-Type: application/json" -d \'{"website_url":"example.com"}\''
+    }
+  });
+});
+
 // Main Clay integration endpoint
 app.post('/analyze-velocity', async (req, res) => {
   try {
