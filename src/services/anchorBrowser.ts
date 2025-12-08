@@ -12,7 +12,7 @@ interface ScrapeResult {
 
 interface AnchorBrowserResponse {
   data: {
-    result: string;
+    result: any; // Can be string or object with nested result
   };
 }
 
@@ -93,14 +93,14 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
       throw new Error(`Anchor Browser API error: ${response.status}`);
     }
 
-    let result = response.data.data.result;
+    let result: any = response.data.data.result;
     console.log(`Result type: ${typeof result}`);
     console.log(`Raw result:`, JSON.stringify(result).substring(0, 500));
     
     // Check if result is double-wrapped (has a nested 'result' property)
-    if (result && typeof result === 'object' && result.result) {
+    if (result && typeof result === 'object' && 'result' in result) {
       console.log('Detected double-wrapped result, extracting inner result');
-      result = result.result;
+      result = (result as any).result;
     }
     
     // Try to parse the JSON result
