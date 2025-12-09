@@ -48,34 +48,37 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
         await delay(delayMs);
       }
 
-      const prompt = `Scrape 60 blog posts from ${domain}
+      const prompt = `Scrape 60 UNIQUE blog posts from ${domain}
 
-TASK: Collect EXACTLY 60 posts. Do NOT stop after one page!
+CRITICAL RULES:
+1. Navigate to DIFFERENT pages - do NOT re-scrape the same page!
+2. Collect 60 DIFFERENT posts - no duplicates!
+3. Each time you click pagination, the posts should be DIFFERENT from previous page
 
-Step 1: Find the blog
-- Go to ${domain}
-- Click "Blog" or "Articles" link in navigation
-- Or try: ${domain}/blog, ${domain}/articles
+Step 1: Find blog at ${domain}
 
-Step 2: Scrape first page
-- Extract all visible posts (title + date)
-- Format dates as YYYY-MM-DD (e.g., 2024-12-09)
-- IMPORTANT: Dates must be in the PAST, not future!
+Step 2: Extract posts from PAGE 1
+- Get titles and dates from the FIRST page
+- Format: YYYY-MM-DD
 
-Step 3: NAVIGATE TO MORE PAGES (repeat until 60 posts)
-After extracting from page 1, you MUST:
-- Look for "Next", "Older", "→", or page "2"
-- CLICK IT to go to page 2
-- Extract all posts from page 2
-- Then click to page 3, extract posts
-- Continue until you have 60 total posts
+Step 3: Navigate to PAGE 2
+- Find and click "Next", "2", "Older Posts", or "→"
+- WAIT for new page to load
+- Verify the posts are DIFFERENT from page 1
+- If same posts appear, try clicking a different pagination button
+- Extract NEW posts from page 2
 
-Example: If each page has 12 posts, click through 5 pages (12x5=60)
+Step 4: Navigate to PAGE 3, 4, 5...
+- Keep clicking Next/pagination
+- Each page should show DIFFERENT posts
+- Stop when: (a) you have 60 unique posts, OR (b) no more pages exist
 
-Step 4: Return JSON
-{"blogTitle": "Blog Name", "posts": [{"title": "...", "publishDate": "2024-12-09"}]}
+ANTI-DUPLICATE CHECK:
+- If you see the same post titles appearing multiple times, you are re-scraping the same page
+- STOP and try clicking a different pagination element
+- The URL should change when you navigate (e.g., ?page=2, /page/2/)
 
-CRITICAL: You must click through MULTIPLE pages. One page is NOT enough!`;
+Return: {"blogTitle": "...", "posts": [{"title": "...", "publishDate": "2025-12-09"}]}`;
 
       const targetUrl = domain.startsWith('http') ? domain : `https://${domain}`;
       console.log(`Starting Anchor Browser scrape for ${domain}...`);
@@ -218,8 +221,17 @@ CRITICAL: You must click through MULTIPLE pages. One page is NOT enough!`;
         }));
       }
 
+      // Deduplicate posts (remove duplicates based on title and date)
+      const uniquePosts = posts.filter((post, index, self) => 
+        index === self.findIndex((p) => 
+          p.title === post.title && p.publishDate === post.publishDate
+        )
+      );
+      
+      console.log(`Deduplicated: ${posts.length} posts → ${uniquePosts.length} unique posts`);
+
       // Success! Return the result
-      return { blogTitle, posts };
+      return { blogTitle, posts: uniquePosts };
 
     } catch (error: any) {
       // Handle errors during this attempt
