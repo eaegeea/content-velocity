@@ -82,10 +82,25 @@ async function processJob(jobId: string, domain: string) {
     const velocityMetrics = analyzeContentVelocity(scrapeResult.posts, scrapeResult.blogTitle);
 
     // Classify blog titles for AEO optimization
-    console.log(`[${jobId}] Starting AEO classification...`);
-    const titles = scrapeResult.posts.map(post => post.title);
-    const aeoClassification = await classifyBlogTitles(domain, titles);
-    console.log(`[${jobId}] AEO classification complete: ${aeoClassification.aeo_optimized_count}/${aeoClassification.total_titles} optimized`);
+    let aeoClassification;
+    try {
+      console.log(`[${jobId}] Starting AEO classification...`);
+      const titles = scrapeResult.posts.map(post => post.title);
+      aeoClassification = await classifyBlogTitles(domain, titles);
+      console.log(`[${jobId}] AEO classification complete: ${aeoClassification.aeo_optimized_count}/${aeoClassification.total_titles} optimized`);
+    } catch (aeoError: any) {
+      console.error(`[${jobId}] AEO classification failed:`, aeoError.message);
+      // Fallback: return empty AEO data
+      aeoClassification = {
+        total_titles: scrapeResult.posts.length,
+        aeo_optimized_count: 0,
+        non_aeo_count: 0,
+        aeo_percentage: 0,
+        non_aeo_percentage: 0,
+        details: []
+      };
+      console.log(`[${jobId}] Continuing without AEO classification`);
+    }
 
     completeJob(jobId, {
       // Basic Info

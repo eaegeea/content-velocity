@@ -120,8 +120,29 @@ export async function classifyBlogTitles(
       }
     );
 
-    const result = JSON.parse(response.data.choices[0].message.content);
-    const details: ClassificationDetail[] = result.details || [];
+    const rawContent = response.data.choices[0]?.message?.content;
+    
+    if (!rawContent) {
+      console.error('No content in x.ai response:', JSON.stringify(response.data, null, 2));
+      throw new Error('x.ai API returned empty response');
+    }
+
+    console.log('Raw x.ai response:', rawContent.substring(0, 500));
+
+    let result;
+    try {
+      result = JSON.parse(rawContent);
+    } catch (parseError) {
+      console.error('JSON parse error. Raw content:', rawContent);
+      throw new Error(`Failed to parse x.ai response as JSON: ${parseError}`);
+    }
+
+    if (!result.details || !Array.isArray(result.details)) {
+      console.error('Invalid response structure:', JSON.stringify(result, null, 2));
+      throw new Error('x.ai response missing "details" array');
+    }
+
+    const details: ClassificationDetail[] = result.details;
 
     // Calculate aggregates
     const total_titles = titles.length;
