@@ -144,8 +144,13 @@ export async function classifyBlogTitles(
 
     const details: ClassificationDetail[] = result.details;
 
-    // Calculate aggregates
-    const total_titles = titles.length;
+    // Validate response matches input
+    if (details.length !== titles.length) {
+      console.warn(`Warning: x.ai returned ${details.length} classifications but received ${titles.length} titles`);
+    }
+
+    // Calculate aggregates (use actual response length for accuracy)
+    const total_titles = details.length;
     const aeo_optimized_count = details.filter(d => d.aeo_optimized).length;
     const non_aeo_count = total_titles - aeo_optimized_count;
     const aeo_percentage = total_titles > 0 
