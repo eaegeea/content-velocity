@@ -26,7 +26,58 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
     throw new Error('ANCHOR_API_KEY environment variable is not set');
   }
 
-  const prompt = `Visit ${domain}, find their blog, visit it, scrape the last 60 blog posts published. These must be most recent blogs, generally in the first few pages of the blog url. Output in JSON format with an array of objects, each containing "title" and "publishDate" fields. The publishDate should be in ISO 8601 format (YYYY-MM-DD). If you cannot find a blog or cannot access it, return an empty array.`;
+  const prompt = `Your task is to scrape the 60 most recent blog posts from: ${domain}
+
+=== STEP 1: LOCATE THE BLOG ===
+1. Visit ${domain}
+2. Look for navigation links containing: "Blog", "Articles", "News", "Insights", "Resources", "Writing"
+3. Check these locations: main nav, header, footer, homepage content
+4. Common URL patterns: /blog, /articles, /posts, /news, /insights, /resources
+5. If no obvious link, try appending /blog to the domain
+
+=== STEP 2: ACCESS THE BLOG ===
+1. Click the blog link or navigate to the blog URL
+2. Wait 3-5 seconds for page to fully load (especially for JavaScript-heavy sites)
+3. Verify you're on the blog listing page (not an individual post)
+
+=== STEP 3: EXTRACT POSTS ===
+For the 60 most recent posts (typically 2-4 pages of pagination):
+- Extract the TITLE (full post title, clean text)
+- Extract the PUBLISH DATE and convert to YYYY-MM-DD format
+- Handle pagination if needed (click "Next", "Older Posts", page numbers)
+- Stop when you reach 60 posts or run out of posts
+
+Date conversion examples:
+- "December 9, 2024" → "2024-12-09"
+- "9 Dec 2024" → "2024-12-09"
+- "12/09/2024" → "2024-12-09"
+
+=== STEP 4: VALIDATE & FORMAT ===
+Before returning, ensure:
+- All dates are in strict YYYY-MM-DD format
+- No empty or whitespace-only titles
+- No duplicate posts
+- Posts sorted newest to oldest
+- No test/placeholder content
+
+=== OUTPUT FORMAT ===
+Return this exact JSON structure:
+{
+  "blogTitle": "The name of the blog section",
+  "posts": [
+    {"title": "Post Title Here", "publishDate": "2024-12-09"},
+    ...
+  ]
+}
+
+=== ERROR HANDLING ===
+- Blog not found: Try direct URLs like ${domain}/blog, ${domain}/articles
+- No dates visible: Check URL patterns or <time> tags
+- Paywall/login required: Return {"blogTitle": null, "posts": []}
+- Fewer than 60 posts exist: Return all available posts
+- Site error/404: Return {"blogTitle": null, "posts": []}
+
+Focus on accuracy over speed. Take your time to find the correct blog section and extract clean, validated data.`;
 
   console.log(`Starting Anchor Browser scrape for ${domain}...`);
   const startTime = Date.now();
