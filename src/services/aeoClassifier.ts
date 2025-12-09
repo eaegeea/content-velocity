@@ -97,7 +97,7 @@ export async function classifyBlogTitles(
     const response = await axios.post(
       'https://api.x.ai/v1/chat/completions',
       {
-        model: 'grok-beta',
+        model: 'grok-4-fast',
         messages: [
           {
             role: 'system',
