@@ -88,28 +88,31 @@ async function processJob(jobId: string, domain: string) {
     console.log(`[${jobId}] AEO classification complete: ${aeoClassification.aeo_optimized_count}/${aeoClassification.total_titles} optimized`);
 
     completeJob(jobId, {
+      // Basic Info
       domain,
       blog_found: true,
       blog_title: velocityMetrics.blogTitle,
+      total_posts_analyzed: aeoClassification.total_titles,
       
-      // 30-day metrics
+      // 30-Day Velocity Metrics
       posts_last_30_days: velocityMetrics.last30DaysCount,
       posts_previous_30_days: velocityMetrics.previous30DaysCount,
-      velocity_30_days: velocityMetrics.velocityStatus,
+      velocity_trend_30_days: velocityMetrics.velocityStatus,
       percentage_change_30_days: `${velocityMetrics.percentageChange}%`,
       
-      // 14-day metrics
+      // 14-Day Velocity Metrics
       posts_last_14_days: velocityMetrics.last14DaysCount,
       posts_previous_14_days: velocityMetrics.previous14DaysCount,
-      velocity_14_days: velocityMetrics.velocityStatus14Days,
+      velocity_trend_14_days: velocityMetrics.velocityStatus14Days,
       percentage_change_14_days: `${velocityMetrics.percentageChange14Days}%`,
       
-      // AEO metrics
-      total_titles: aeoClassification.total_titles,
+      // AEO Optimization Metrics
       aeo_optimized_count: aeoClassification.aeo_optimized_count,
+      aeo_optimized_percentage: `${aeoClassification.aeo_percentage}%`,
       non_aeo_count: aeoClassification.non_aeo_count,
-      aeo_percentage: `${aeoClassification.aeo_percentage}%`,
       non_aeo_percentage: `${aeoClassification.non_aeo_percentage}%`,
+      
+      // Detailed AEO Analysis (per-title breakdown)
       aeo_details: aeoClassification.details
     });
   } catch (error: any) {

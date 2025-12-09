@@ -65,7 +65,7 @@ Step 2: Extract posts from PAGE 1
 
 Step 3: Navigate to PAGE 2
 - SCROLL to bottom of page
-- Look for "Next", "2", "Older Posts", "Load More", or "→"
+- Look for "Next", "2", "Older Posts", "Load More", "See More", or "→"
 - CLICK the pagination control
 - WAIT 2-3 seconds for content to update (URL may NOT change - that's OK!)
 - Check if post titles changed - if yes, extract them
