@@ -81,22 +81,19 @@ If no blog found, return: {"blogTitle": null, "posts": []}`;
             type: 'object',
             properties: {
               blogTitle: {
-                type: ['string', 'null'],
-                description: 'The title of the blog, or null if not found'
+                type: 'string',
+                description: 'The title of the blog'
               },
               posts: {
                 type: 'array',
-                description: 'Array of blog posts',
                 items: {
                   type: 'object',
                   properties: {
                     title: {
-                      type: 'string',
-                      description: 'The title of the blog post'
+                      type: 'string'
                     },
                     publishDate: {
-                      type: 'string',
-                      description: 'The publish date in ISO 8601 format (YYYY-MM-DD)'
+                      type: 'string'
                     }
                   }
                 }
