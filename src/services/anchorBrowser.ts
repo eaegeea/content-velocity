@@ -160,11 +160,12 @@ Focus on accuracy and persistence. Try multiple strategies. Don't give up after 
             type: 'object',
             properties: {
               blogTitle: {
-                type: 'string',
-                description: 'The title of the blog'
+                type: ['string', 'null'],
+                description: 'The title of the blog, or null if not found'
               },
               posts: {
                 type: 'array',
+                description: 'Array of blog posts',
                 items: {
                   type: 'object',
                   properties: {
@@ -176,12 +177,10 @@ Focus on accuracy and persistence. Try multiple strategies. Don't give up after 
                       type: 'string',
                       description: 'The publish date in ISO 8601 format (YYYY-MM-DD)'
                     }
-                  },
-                  required: ['title', 'publishDate']
+                  }
                 }
               }
-            },
-            required: ['blogTitle', 'posts']
+            }
           }
         },
         {
