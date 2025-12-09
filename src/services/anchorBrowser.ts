@@ -63,8 +63,9 @@ Step 3: Navigate to PAGE 2
 - SCROLL to bottom of page
 - Look for "Next", "2", "Older Posts", "Load More", or "→"
 - CLICK the pagination control
-- WAIT for page to load
-- Extract all posts from page 2 (scroll if needed)
+- WAIT 2-3 seconds for content to update (URL may NOT change - that's OK!)
+- Check if post titles changed - if yes, extract them
+- If posts changed but URL stayed same, pagination is working (continue!)
 
 Step 4: Repeat for pages 3, 4, 5...
 - Keep scrolling to bottom and clicking Next
@@ -74,7 +75,8 @@ Step 4: Repeat for pages 3, 4, 5...
 IMPORTANT CHECKS:
 ✓ Scroll down on each page - don't just grab top visible posts
 ✓ Each page should have DIFFERENT posts (not duplicates)
-✓ URL should change when navigating (e.g., ?page=2, /page/2/)
+✓ Trust UI pagination buttons even if URL doesn't change
+✓ Verify content changed after clicking (different post titles = success!)
 ✓ If infinite scroll: keep scrolling until 60 posts loaded
 
 Return: {"blogTitle": "...", "posts": [{"title": "...", "publishDate": "2025-12-09"}]}`;
