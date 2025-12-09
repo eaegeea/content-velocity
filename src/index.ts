@@ -221,8 +221,8 @@ const server = app.listen(PORT, () => {
   console.log(`Content Velocity API ready for Clay integration`);
 });
 
-// Set timeout to 10 minutes for long-running Anchor Browser tasks
-server.timeout = 600000; // 10 minutes
-server.keepAliveTimeout = 610000; // Slightly longer than timeout
-server.headersTimeout = 620000; // Slightly longer than keepAliveTimeout
+// Set timeout to 20 minutes for long-running Anchor Browser tasks (clicking into posts takes time)
+server.timeout = 1200000; // 20 minutes
+server.keepAliveTimeout = 1210000; // Slightly longer than timeout
+server.headersTimeout = 1220000; // Slightly longer than keepAliveTimeout
 

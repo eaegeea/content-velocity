@@ -132,7 +132,7 @@ Return: {"blogTitle": "...", "posts": [{"title": "...", "publishDate": "2025-12-
             'Content-Type': 'application/json',
             'anchor-api-key': apiKey
           },
-          timeout: 300000, // 5 minutes timeout for Anchor Browser API
+          timeout: 900000, // 15 minutes timeout for Anchor Browser API (clicking into posts takes time)
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
           validateStatus: () => true // Accept all status codes, handle errors manually
