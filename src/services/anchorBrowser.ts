@@ -54,10 +54,14 @@ CRITICAL: Scroll down and navigate pages to find ALL posts!
 
 Step 1: Find blog at ${domain}
 
-Step 2: Extract ALL posts from PAGE 1
-- SCROLL DOWN to see all posts on the page (pagination may be at bottom!)
-- Extract all visible post titles and dates (format: YYYY-MM-DD)
-- Look for pagination controls (they're usually at the BOTTOM after scrolling)
+Step 2: Extract posts from PAGE 1
+- SCROLL DOWN to see all posts
+- Try to find dates on the listing page (look for dates near titles)
+- If dates are NOT visible on listing:
+  * Click into FIRST post → extract date from article → go BACK
+  * Click into SECOND post → extract date → go BACK
+  * Continue for all posts on page 1
+- Extract all titles + dates (format: YYYY-MM-DD)
 
 Step 3: Navigate to PAGE 2
 - SCROLL to bottom of page
@@ -69,11 +73,12 @@ Step 3: Navigate to PAGE 2
 
 Step 4: Repeat for pages 3, 4, 5...
 - Keep scrolling to bottom and clicking Next
-- Extract all posts from each page
+- For each new page, extract titles + dates (click into posts if dates not visible)
 - Continue until you have 60 unique posts OR no more pages
 
 IMPORTANT CHECKS:
 ✓ Scroll down on each page - don't just grab top visible posts
+✓ If dates NOT on listing page, click into each post to get the date
 ✓ Each page should have DIFFERENT posts (not duplicates)
 ✓ Trust UI pagination buttons even if URL doesn't change
 ✓ Verify content changed after clicking (different post titles = success!)
