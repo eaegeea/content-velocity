@@ -202,8 +202,12 @@ Focus on accuracy and persistence. Try multiple strategies. Don't give up after 
       if (response.status >= 500) {
         // Server error - retry
         const errorMsg = `Anchor Browser server error (${response.status})`;
-        console.error(errorMsg, String(response.data).substring(0, 200));
-        lastError = new Error(errorMsg);
+        const errorDetails = typeof response.data === 'object' 
+          ? JSON.stringify(response.data, null, 2).substring(0, 500)
+          : String(response.data).substring(0, 500);
+        console.error(errorMsg);
+        console.error('Error details:', errorDetails);
+        lastError = new Error(`${errorMsg}: ${errorDetails}`);
         continue; // Retry
       }
       
@@ -288,12 +292,16 @@ Focus on accuracy and persistence. Try multiple strategies. Don't give up after 
         const status = error.response.status;
         if (status >= 500) {
           // Server error - will retry
+          const errorData = typeof error.response.data === 'object'
+            ? JSON.stringify(error.response.data, null, 2)
+            : String(error.response.data);
           console.error(`Anchor Browser server error (${status}) on attempt ${attempt + 1}/${MAX_RETRIES}`);
-          lastError = new Error(`Anchor Browser server error: ${status}. Their service may be temporarily unavailable.`);
+          console.error('Server error details:', errorData.substring(0, 500));
+          lastError = new Error(`Anchor Browser server error: ${status}. ${errorData.substring(0, 200)}`);
           continue; // Retry
         } else {
           // Client error - don't retry
-          console.error('Anchor Browser API client error:', error.response.data);
+          console.error('Anchor Browser API client error:', JSON.stringify(error.response.data, null, 2));
           throw new Error(`Anchor Browser API client error: ${status}. Please check your request parameters.`);
         }
       } else if (error.request) {
