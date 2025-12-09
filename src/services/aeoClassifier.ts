@@ -37,6 +37,20 @@ NOT AEO:
 - Vague thought leadership
 - Bland editorial without clear task/query intent
 
+CLASSIFICATION EXAMPLES:
+
+AEO:
+- "How to choose the right SOC 2 automation tool"
+- "SOC 2 changes in 2025: What companies need to know"
+- "Top 10 IAM best practices for scaling teams"
+- "Understanding OAuth vs SAML: A simple guide"
+
+NOT AEO:
+- "Announcing our Q4 product release"
+- "Inside our company offsite"
+- "Product Update: v3.2 is now live"
+- "Reflecting on leadership in 2025"
+
 For EACH title, classify as AEO or Not AEO with a brief reason.
 
 Return ONLY valid JSON matching this schema:
