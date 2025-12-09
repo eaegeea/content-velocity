@@ -16,7 +16,8 @@ interface AEOClassificationResult {
   non_aeo_count: number;
   aeo_percentage: number;
   non_aeo_percentage: number;
-  details: ClassificationDetail[];
+  aeo_optimized_titles: Array<{ title: string; reason: string }>;
+  non_aeo_titles: Array<{ title: string; reason: string }>;
 }
 
 const SYSTEM_PROMPT = `You are an AI subsystem that classifies blog post titles as AEO-optimized or not.
@@ -162,13 +163,23 @@ export async function classifyBlogTitles(
 
     console.log(`AEO Classification complete: ${aeo_optimized_count}/${total_titles} optimized (${aeo_percentage}%)`);
 
+    // Split details into optimized and non-optimized arrays
+    const aeo_optimized_titles = details
+      .filter(d => d.aeo_optimized)
+      .map(d => ({ title: d.title, reason: d.reason }));
+    
+    const non_aeo_titles = details
+      .filter(d => !d.aeo_optimized)
+      .map(d => ({ title: d.title, reason: d.reason }));
+
     return {
       total_titles,
       aeo_optimized_count,
       non_aeo_count,
       aeo_percentage,
       non_aeo_percentage,
-      details
+      aeo_optimized_titles,
+      non_aeo_titles
     };
   } catch (error: any) {
     if (error.response) {

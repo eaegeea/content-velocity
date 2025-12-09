@@ -97,7 +97,8 @@ async function processJob(jobId: string, domain: string) {
         non_aeo_count: 0,
         aeo_percentage: 0,
         non_aeo_percentage: 0,
-        details: []
+        aeo_optimized_titles: [],
+        non_aeo_titles: []
       };
       console.log(`[${jobId}] Continuing without AEO classification`);
     }
@@ -127,8 +128,11 @@ async function processJob(jobId: string, domain: string) {
       non_aeo_count: aeoClassification.non_aeo_count,
       non_aeo_percentage: `${aeoClassification.non_aeo_percentage}%`,
       
-      // Detailed AEO Analysis (per-title breakdown)
-      aeo_details: aeoClassification.details
+      // AEO Optimized Titles (detailed breakdown)
+      aeo_optimized_titles: aeoClassification.aeo_optimized_titles,
+      
+      // Non-AEO Titles (detailed breakdown)
+      non_aeo_titles: aeoClassification.non_aeo_titles
     });
   } catch (error: any) {
     console.error(`[${jobId}] Error:`, error);
