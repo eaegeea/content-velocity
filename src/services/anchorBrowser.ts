@@ -44,8 +44,15 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
 For the 60 most recent posts (typically 2-4 pages of pagination):
 - Extract the TITLE (full post title, clean text)
 - Extract the PUBLISH DATE and convert to YYYY-MM-DD format
-- Handle pagination if needed (click "Next", "Older Posts", page numbers)
 - Stop when you reach 60 posts or run out of posts
+
+CRITICAL NAVIGATION RULES:
+You MUST use the blog page's UI navigation - DO NOT construct or modify URLs manually.
+- PAGINATION: Click on "Next", "Older Posts", page numbers (1, 2, 3...), or "Load More" buttons
+- INFINITE SCROLL: Scroll down to the bottom of the page to trigger more posts to load
+- Wait 2-3 seconds after each navigation action for new posts to load
+- Extract posts from each page before navigating to the next
+- Keep navigating through pages until you have 60 posts OR no more pages exist
 
 Date conversion examples:
 - "December 9, 2024" → "2024-12-09"
