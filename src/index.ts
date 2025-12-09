@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { analyzeContentVelocity } from './services/velocityAnalyzer';
 import { scrapeBlogPosts } from './services/anchorBrowser';
 import { createJob, getJob, updateJob, completeJob, failJob } from './services/jobQueue';
+import { classifyBlogTitles } from './services/aeoClassifier';
 
 dotenv.config();
 
@@ -80,6 +81,12 @@ async function processJob(jobId: string, domain: string) {
 
     const velocityMetrics = analyzeContentVelocity(scrapeResult.posts, scrapeResult.blogTitle);
 
+    // Classify blog titles for AEO optimization
+    console.log(`[${jobId}] Starting AEO classification...`);
+    const titles = scrapeResult.posts.map(post => post.title);
+    const aeoClassification = await classifyBlogTitles(domain, titles);
+    console.log(`[${jobId}] AEO classification complete: ${aeoClassification.aeo_optimized_count}/${aeoClassification.total_titles} optimized`);
+
     completeJob(jobId, {
       domain,
       blog_found: true,
@@ -95,7 +102,15 @@ async function processJob(jobId: string, domain: string) {
       posts_last_14_days: velocityMetrics.last14DaysCount,
       posts_previous_14_days: velocityMetrics.previous14DaysCount,
       velocity_14_days: velocityMetrics.velocityStatus14Days,
-      percentage_change_14_days: `${velocityMetrics.percentageChange14Days}%`
+      percentage_change_14_days: `${velocityMetrics.percentageChange14Days}%`,
+      
+      // AEO metrics
+      total_titles: aeoClassification.total_titles,
+      aeo_optimized_count: aeoClassification.aeo_optimized_count,
+      non_aeo_count: aeoClassification.non_aeo_count,
+      aeo_percentage: `${aeoClassification.aeo_percentage}%`,
+      non_aeo_percentage: `${aeoClassification.non_aeo_percentage}%`,
+      aeo_details: aeoClassification.details
     });
   } catch (error: any) {
     console.error(`[${jobId}] Error:`, error);
