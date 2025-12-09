@@ -170,7 +170,8 @@ Focus on accuracy over speed. Take your time to find the correct blog section an
       if (response.status >= 500) {
         // Server error - retry
         const errorMsg = `Anchor Browser server error (${response.status})`;
-        console.error(errorMsg, typeof response.data === 'string' ? response.data.substring(0, 200) : response.data);
+        const errorData = typeof response.data === 'string' ? response.data.substring(0, 200) : JSON.stringify(response.data).substring(0, 200);
+        console.error(errorMsg, errorData);
         lastError = new Error(errorMsg);
         continue; // Retry
       }
