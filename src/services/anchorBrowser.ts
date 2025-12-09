@@ -51,16 +51,44 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
       const prompt = `Your task is to scrape the 60 most recent blog posts from: ${domain}
 
 === STEP 1: LOCATE THE BLOG ===
-1. Visit ${domain}
-2. Look for navigation links containing: "Blog", "Articles", "News", "Insights", "Resources", "Writing"
-3. Check these locations: main nav, header, footer, homepage content
-4. Common URL patterns: /blog, /articles, /posts, /news, /insights, /resources
-5. If no obvious link, try appending /blog to the domain
+IMPORTANT: Try MULTIPLE strategies. Don't give up after one 404!
+
+Strategy A - Follow Navigation Links:
+1. Visit ${domain} and wait for page to fully load
+2. Look for clickable links with text: "Blog", "Articles", "News", "Insights", "Resources", "Writing", "Learn", "Knowledge", "Updates"
+3. Check: main nav bar, header menu, footer, homepage buttons
+4. Click the most likely blog link
+
+Strategy B - Try Common URL Patterns (if Strategy A fails):
+Try these URLs in order until one works:
+- ${domain}/blog
+- ${domain}/articles  
+- ${domain}/news
+- ${domain}/insights
+- ${domain}/resources/blog
+- ${domain}/blog/articles
+- ${domain}/content
+- ${domain}/posts
+
+Strategy C - Search the Homepage:
+1. Look for a section showing recent articles/posts on the homepage
+2. Look for "Read more", "View all articles", "See all posts" links
+3. Click those to reach the blog listing page
+
+DON'T navigate to non-existent URLs. If you get a 404, try the next strategy!
+
+Strategy D - Inspect the Homepage Carefully:
+1. Sometimes blogs are embedded right on the homepage
+2. Look for a grid/list of articles with titles and dates
+3. If posts are visible on homepage, scrape from there instead
+
+REMEMBER: Getting ONE 404 doesn't mean failure. Try ALL strategies before giving up!
 
 === STEP 2: ACCESS THE BLOG ===
-1. Click the blog link or navigate to the blog URL
+1. Once you find a working blog URL (no 404!), navigate to it
 2. Wait 3-5 seconds for page to fully load (especially for JavaScript-heavy sites)
-3. Verify you're on the blog listing page (not an individual post)
+3. Verify you're on the blog LISTING page (shows multiple posts, not just one article)
+4. If you land on a single post, look for "Back to Blog", "All Posts", or breadcrumb navigation
 
 === STEP 3: EXTRACT POSTS ===
 For the 60 most recent posts (typically 2-4 pages of pagination):
@@ -100,13 +128,16 @@ Return this exact JSON structure:
 }
 
 === ERROR HANDLING ===
-- Blog not found: Try direct URLs like ${domain}/blog, ${domain}/articles
-- No dates visible: Check URL patterns or <time> tags
+- 404 Errors: DON'T give up! Try all strategies in Step 1 before failing
+- Blog truly not found after all strategies: Return {"blogTitle": null, "posts": []}
+- No dates visible: Check <time> tags, post metadata, or URL patterns like /2024/12/
 - Paywall/login required: Return {"blogTitle": null, "posts": []}
-- Fewer than 60 posts exist: Return all available posts
-- Site error/404: Return {"blogTitle": null, "posts": []}
+- Fewer than 60 posts exist: Return all available posts (that's OK!)
+- JavaScript-heavy site not loading: Wait longer (5-10 seconds)
 
-Focus on accuracy over speed. Take your time to find the correct blog section and extract clean, validated data.`;
+SUCCESS CRITERIA: You must find a page with MULTIPLE blog posts listed, not just one article.
+
+Focus on accuracy and persistence. Try multiple strategies. Don't give up after the first 404!`;
 
       console.log(`Starting Anchor Browser scrape for ${domain}...`);
       const startTime = Date.now();
