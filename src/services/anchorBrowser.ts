@@ -139,14 +139,16 @@ SUCCESS CRITERIA: You must find a page with MULTIPLE blog posts listed, not just
 
 Focus on accuracy and persistence. Try multiple strategies. Don't give up after the first 404!`;
 
+      const targetUrl = domain.startsWith('http') ? domain : `https://${domain}`;
       console.log(`Starting Anchor Browser scrape for ${domain}...`);
+      console.log(`Target URL: ${targetUrl}`);
       const startTime = Date.now();
   
       const response = await axios.post<AnchorBrowserResponse>(
         'https://api.anchorbrowser.io/v1/tools/perform-web-task',
         {
           prompt,
-          url: domain.startsWith('http') ? domain : `https://${domain}`,
+          url: targetUrl,
           agent: 'browser-use',
           provider: 'gemini',
           model: 'openai/gpt-oss-120b',

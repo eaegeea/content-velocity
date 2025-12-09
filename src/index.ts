@@ -135,12 +135,13 @@ app.post('/analyze-velocity', async (req, res) => {
     let domain = website_url;
     try {
       const url = new URL(website_url.startsWith('http') ? website_url : `https://${website_url}`);
-      domain = url.hostname.replace('www.', '');
+      domain = url.hostname; // Keep www. if present - some sites need it
     } catch (e) {
       // If URL parsing fails, use as-is
     }
 
     console.log(`Creating job for domain: ${domain}`);
+    console.log(`Original input: ${website_url}`);
 
     // Create job and start processing in background
     const jobId = createJob(domain);
