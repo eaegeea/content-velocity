@@ -48,23 +48,34 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
         await delay(delayMs);
       }
 
-      const prompt = `Go to ${domain} and find their blog. Scrape exactly 60 of the most recent blog posts.
+      const prompt = `Scrape 60 blog posts from ${domain}
 
-CRITICAL: You MUST collect 60 posts by navigating through multiple pages!
+TASK: Collect EXACTLY 60 posts. Do NOT stop after one page!
 
-Steps:
-1. Go to ${domain} and find the blog (try navigation menu, /blog, /articles, /news)
-2. Extract posts from the current page (get title and publishDate in YYYY-MM-DD format)
-3. PAGINATION - Keep going through pages until you have 60 posts:
-   - Click "Next", "Older Posts", page numbers (2, 3, 4...), or "Load More" buttons
-   - If infinite scroll, scroll to bottom to load more posts
-   - Extract posts from each new page
-   - Stop when you reach 60 posts OR no more pages exist
-4. Return JSON: {"blogTitle": "Blog Name", "posts": [{"title": "Post Title", "publishDate": "2024-12-09"}]}
+Step 1: Find the blog
+- Go to ${domain}
+- Click "Blog" or "Articles" link in navigation
+- Or try: ${domain}/blog, ${domain}/articles
 
-IMPORTANT: Most blogs show 10-20 posts per page, so you'll need to click through 3-6 pages to get 60 posts. Don't stop after the first page!
+Step 2: Scrape first page
+- Extract all visible posts (title + date)
+- Format dates as YYYY-MM-DD (e.g., 2024-12-09)
+- IMPORTANT: Dates must be in the PAST, not future!
 
-If no blog found: {"blogTitle": null, "posts": []}`;
+Step 3: NAVIGATE TO MORE PAGES (repeat until 60 posts)
+After extracting from page 1, you MUST:
+- Look for "Next", "Older", "→", or page "2"
+- CLICK IT to go to page 2
+- Extract all posts from page 2
+- Then click to page 3, extract posts
+- Continue until you have 60 total posts
+
+Example: If each page has 12 posts, click through 5 pages (12x5=60)
+
+Step 4: Return JSON
+{"blogTitle": "Blog Name", "posts": [{"title": "...", "publishDate": "2024-12-09"}]}
+
+CRITICAL: You must click through MULTIPLE pages. One page is NOT enough!`;
 
       const targetUrl = domain.startsWith('http') ? domain : `https://${domain}`;
       console.log(`Starting Anchor Browser scrape for ${domain}...`);
