@@ -90,6 +90,7 @@ async function processJob(jobId: string, domain: string) {
       percentage_change: velocityMetrics.percentageChange,
       velocity_trend_30days: velocityMetrics.velocityStatus,
       velocity_trend_14days: velocityMetrics.velocityStatus14Days,
+      percentage_change_14days: velocityMetrics.percentageChange14Days,
       blog_posts_last_14_days: velocityMetrics.last14DaysCount,
       blog_posts_previous_14_days: velocityMetrics.previous14DaysCount
     });

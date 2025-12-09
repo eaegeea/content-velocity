@@ -50,33 +50,32 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
 
       const prompt = `Scrape 60 UNIQUE blog posts from ${domain}
 
-CRITICAL RULES:
-1. Navigate to DIFFERENT pages - do NOT re-scrape the same page!
-2. Collect 60 DIFFERENT posts - no duplicates!
-3. Each time you click pagination, the posts should be DIFFERENT from previous page
+CRITICAL: Scroll down and navigate pages to find ALL posts!
 
 Step 1: Find blog at ${domain}
 
-Step 2: Extract posts from PAGE 1
-- Get titles and dates from the FIRST page
-- Format: YYYY-MM-DD
+Step 2: Extract ALL posts from PAGE 1
+- SCROLL DOWN to see all posts on the page (pagination may be at bottom!)
+- Extract all visible post titles and dates (format: YYYY-MM-DD)
+- Look for pagination controls (they're usually at the BOTTOM after scrolling)
 
 Step 3: Navigate to PAGE 2
-- Find and click "Next", "2", "Older Posts", or "→"
-- WAIT for new page to load
-- Verify the posts are DIFFERENT from page 1
-- If same posts appear, try clicking a different pagination button
-- Extract NEW posts from page 2
+- SCROLL to bottom of page
+- Look for "Next", "2", "Older Posts", "Load More", or "→"
+- CLICK the pagination control
+- WAIT for page to load
+- Extract all posts from page 2 (scroll if needed)
 
-Step 4: Navigate to PAGE 3, 4, 5...
-- Keep clicking Next/pagination
-- Each page should show DIFFERENT posts
-- Stop when: (a) you have 60 unique posts, OR (b) no more pages exist
+Step 4: Repeat for pages 3, 4, 5...
+- Keep scrolling to bottom and clicking Next
+- Extract all posts from each page
+- Continue until you have 60 unique posts OR no more pages
 
-ANTI-DUPLICATE CHECK:
-- If you see the same post titles appearing multiple times, you are re-scraping the same page
-- STOP and try clicking a different pagination element
-- The URL should change when you navigate (e.g., ?page=2, /page/2/)
+IMPORTANT CHECKS:
+✓ Scroll down on each page - don't just grab top visible posts
+✓ Each page should have DIFFERENT posts (not duplicates)
+✓ URL should change when navigating (e.g., ?page=2, /page/2/)
+✓ If infinite scroll: keep scrolling until 60 posts loaded
 
 Return: {"blogTitle": "...", "posts": [{"title": "...", "publishDate": "2025-12-09"}]}`;
 
