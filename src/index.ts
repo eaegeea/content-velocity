@@ -84,15 +84,18 @@ async function processJob(jobId: string, domain: string) {
       domain,
       blog_found: true,
       blog_title: velocityMetrics.blogTitle,
-      last_30_days_count: velocityMetrics.last30DaysCount,
-      previous_30_days_count: velocityMetrics.previous30DaysCount,
-      velocity_status: velocityMetrics.velocityStatus,
-      percentage_change: `${velocityMetrics.percentageChange}%`,
-      velocity_trend_30days: velocityMetrics.velocityStatus,
-      velocity_trend_14days: velocityMetrics.velocityStatus14Days,
-      percentage_change_14days: `${velocityMetrics.percentageChange14Days}%`,
-      blog_posts_last_14_days: velocityMetrics.last14DaysCount,
-      blog_posts_previous_14_days: velocityMetrics.previous14DaysCount
+      
+      // 30-day metrics
+      posts_last_30_days: velocityMetrics.last30DaysCount,
+      posts_previous_30_days: velocityMetrics.previous30DaysCount,
+      velocity_30_days: velocityMetrics.velocityStatus,
+      percentage_change_30_days: `${velocityMetrics.percentageChange}%`,
+      
+      // 14-day metrics
+      posts_last_14_days: velocityMetrics.last14DaysCount,
+      posts_previous_14_days: velocityMetrics.previous14DaysCount,
+      velocity_14_days: velocityMetrics.velocityStatus14Days,
+      percentage_change_14_days: `${velocityMetrics.percentageChange14Days}%`
     });
   } catch (error: any) {
     console.error(`[${jobId}] Error:`, error);
