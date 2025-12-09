@@ -9,13 +9,21 @@ interface VelocityMetrics {
   previous30DaysCount: number;
   velocityStatus: 'Velocity up' | 'Velocity down' | 'No change';
   percentageChange: number;
+  last14DaysCount: number;
+  previous14DaysCount: number;
+  velocityStatus14Days: 'Velocity up' | 'Velocity down' | 'No change';
+  percentageChange14Days: number;
 }
 
 /**
- * Analyzes content velocity by comparing last 30 days vs previous 30 days
+ * Analyzes content velocity by comparing:
+ * - Last 30 days vs previous 30 days
+ * - Last 14 days vs previous 14 days
  */
 export function analyzeContentVelocity(posts: BlogPost[], blogTitle: string | null = null): VelocityMetrics {
   const now = new Date();
+  
+  // 30-day periods
   const last30DaysStart = new Date(now);
   last30DaysStart.setDate(now.getDate() - 30);
   
@@ -23,8 +31,18 @@ export function analyzeContentVelocity(posts: BlogPost[], blogTitle: string | nu
   previous30DaysStart.setDate(now.getDate() - 60);
   previous30DaysStart.setHours(0, 0, 0, 0);
 
+  // 14-day periods
+  const last14DaysStart = new Date(now);
+  last14DaysStart.setDate(now.getDate() - 14);
+  
+  const previous14DaysStart = new Date(now);
+  previous14DaysStart.setDate(now.getDate() - 28);
+  previous14DaysStart.setHours(0, 0, 0, 0);
+
   let last30DaysCount = 0;
   let previous30DaysCount = 0;
+  let last14DaysCount = 0;
+  let previous14DaysCount = 0;
 
   // Process each post
   for (const post of posts) {
@@ -66,9 +84,18 @@ export function analyzeContentVelocity(posts: BlogPost[], blogTitle: string | nu
     else if (publishDate >= previous30DaysStart && publishDate < last30DaysStart) {
       previous30DaysCount++;
     }
+
+    // Count posts in last 14 days
+    if (publishDate >= last14DaysStart && publishDate <= now) {
+      last14DaysCount++;
+    }
+    // Count posts in previous 14 days (15-28 days ago)
+    else if (publishDate >= previous14DaysStart && publishDate < last14DaysStart) {
+      previous14DaysCount++;
+    }
   }
 
-  // Calculate percentage change
+  // Calculate 30-day percentage change
   let percentageChange = 0;
   let velocityStatus: 'Velocity up' | 'Velocity down' | 'No change' = 'No change';
 
@@ -81,13 +108,31 @@ export function analyzeContentVelocity(posts: BlogPost[], blogTitle: string | nu
       velocityStatus = 'Velocity down';
     }
   } else if (last30DaysCount > 0 && previous30DaysCount === 0) {
-    // If there were no posts in previous period but there are now
     percentageChange = 100;
     velocityStatus = 'Velocity up';
   } else if (last30DaysCount === 0 && previous30DaysCount > 0) {
-    // If there were posts before but none now
     percentageChange = -100;
     velocityStatus = 'Velocity down';
+  }
+
+  // Calculate 14-day percentage change
+  let percentageChange14Days = 0;
+  let velocityStatus14Days: 'Velocity up' | 'Velocity down' | 'No change' = 'No change';
+
+  if (previous14DaysCount > 0) {
+    percentageChange14Days = ((last14DaysCount - previous14DaysCount) / previous14DaysCount) * 100;
+    
+    if (percentageChange14Days > 0) {
+      velocityStatus14Days = 'Velocity up';
+    } else if (percentageChange14Days < 0) {
+      velocityStatus14Days = 'Velocity down';
+    }
+  } else if (last14DaysCount > 0 && previous14DaysCount === 0) {
+    percentageChange14Days = 100;
+    velocityStatus14Days = 'Velocity up';
+  } else if (last14DaysCount === 0 && previous14DaysCount > 0) {
+    percentageChange14Days = -100;
+    velocityStatus14Days = 'Velocity down';
   }
 
   return {
@@ -95,7 +140,11 @@ export function analyzeContentVelocity(posts: BlogPost[], blogTitle: string | nu
     last30DaysCount,
     previous30DaysCount,
     velocityStatus,
-    percentageChange: Math.round(percentageChange * 100) / 100 // Round to 2 decimal places
+    percentageChange: Math.round(percentageChange * 100) / 100,
+    last14DaysCount,
+    previous14DaysCount,
+    velocityStatus14Days,
+    percentageChange14Days: Math.round(percentageChange14Days * 100) / 100
   };
 }
 

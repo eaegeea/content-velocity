@@ -87,7 +87,11 @@ async function processJob(jobId: string, domain: string) {
       last_30_days_count: velocityMetrics.last30DaysCount,
       previous_30_days_count: velocityMetrics.previous30DaysCount,
       velocity_status: velocityMetrics.velocityStatus,
-      percentage_change: velocityMetrics.percentageChange
+      percentage_change: velocityMetrics.percentageChange,
+      velocity_trend_30days: velocityMetrics.velocityStatus,
+      velocity_trend_14days: velocityMetrics.velocityStatus14Days,
+      blog_posts_last_14_days: velocityMetrics.last14DaysCount,
+      blog_posts_previous_14_days: velocityMetrics.previous14DaysCount
     });
   } catch (error: any) {
     console.error(`[${jobId}] Error:`, error);
