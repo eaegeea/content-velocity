@@ -48,17 +48,23 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
         await delay(delayMs);
       }
 
-      const prompt = `Go to ${domain} and find their blog. Scrape the 60 most recent blog posts with their titles and publish dates.
+      const prompt = `Go to ${domain} and find their blog. Scrape exactly 60 of the most recent blog posts.
 
-Instructions:
-1. Navigate to ${domain}
-2. Find the blog (check navigation menu, try /blog, /articles, /news)
-3. Extract up to 60 most recent blog posts
-4. For each post get: title and publishDate (format as YYYY-MM-DD)
-5. Use pagination/scrolling to get multiple pages of posts
-6. Return JSON: {"blogTitle": "Blog Name", "posts": [{"title": "...", "publishDate": "2024-12-09"}]}
+CRITICAL: You MUST collect 60 posts by navigating through multiple pages!
 
-If no blog found, return: {"blogTitle": null, "posts": []}`;
+Steps:
+1. Go to ${domain} and find the blog (try navigation menu, /blog, /articles, /news)
+2. Extract posts from the current page (get title and publishDate in YYYY-MM-DD format)
+3. PAGINATION - Keep going through pages until you have 60 posts:
+   - Click "Next", "Older Posts", page numbers (2, 3, 4...), or "Load More" buttons
+   - If infinite scroll, scroll to bottom to load more posts
+   - Extract posts from each new page
+   - Stop when you reach 60 posts OR no more pages exist
+4. Return JSON: {"blogTitle": "Blog Name", "posts": [{"title": "Post Title", "publishDate": "2024-12-09"}]}
+
+IMPORTANT: Most blogs show 10-20 posts per page, so you'll need to click through 3-6 pages to get 60 posts. Don't stop after the first page!
+
+If no blog found: {"blogTitle": null, "posts": []}`;
 
       const targetUrl = domain.startsWith('http') ? domain : `https://${domain}`;
       console.log(`Starting Anchor Browser scrape for ${domain}...`);
