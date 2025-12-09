@@ -87,7 +87,8 @@ export async function classifyBlogTitles(
       non_aeo_count: 0,
       aeo_percentage: 0,
       non_aeo_percentage: 0,
-      details: []
+      aeo_optimized_titles: [],
+      non_aeo_titles: []
     };
   }
 
