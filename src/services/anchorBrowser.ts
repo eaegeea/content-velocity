@@ -48,96 +48,17 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
         await delay(delayMs);
       }
 
-      const prompt = `Your task is to scrape the 60 most recent blog posts from: ${domain}
+      const prompt = `Go to ${domain} and find their blog. Scrape the 60 most recent blog posts with their titles and publish dates.
 
-=== STEP 1: LOCATE THE BLOG ===
-IMPORTANT: Try MULTIPLE strategies. Don't give up after one 404!
+Instructions:
+1. Navigate to ${domain}
+2. Find the blog (check navigation menu, try /blog, /articles, /news)
+3. Extract up to 60 most recent blog posts
+4. For each post get: title and publishDate (format as YYYY-MM-DD)
+5. Use pagination/scrolling to get multiple pages of posts
+6. Return JSON: {"blogTitle": "Blog Name", "posts": [{"title": "...", "publishDate": "2024-12-09"}]}
 
-Strategy A - Follow Navigation Links:
-1. Visit ${domain} and wait for page to fully load
-2. Look for clickable links with text: "Blog", "Articles", "News", "Insights", "Resources", "Writing", "Learn", "Knowledge", "Updates"
-3. Check: main nav bar, header menu, footer, homepage buttons
-4. Click the most likely blog link
-
-Strategy B - Try Common URL Patterns (if Strategy A fails):
-Try these URLs in order until one works:
-- ${domain}/blog
-- ${domain}/articles  
-- ${domain}/news
-- ${domain}/insights
-- ${domain}/resources/blog
-- ${domain}/blog/articles
-- ${domain}/content
-- ${domain}/posts
-
-Strategy C - Search the Homepage:
-1. Look for a section showing recent articles/posts on the homepage
-2. Look for "Read more", "View all articles", "See all posts" links
-3. Click those to reach the blog listing page
-
-DON'T navigate to non-existent URLs. If you get a 404, try the next strategy!
-
-Strategy D - Inspect the Homepage Carefully:
-1. Sometimes blogs are embedded right on the homepage
-2. Look for a grid/list of articles with titles and dates
-3. If posts are visible on homepage, scrape from there instead
-
-REMEMBER: Getting ONE 404 doesn't mean failure. Try ALL strategies before giving up!
-
-=== STEP 2: ACCESS THE BLOG ===
-1. Once you find a working blog URL (no 404!), navigate to it
-2. Wait 3-5 seconds for page to fully load (especially for JavaScript-heavy sites)
-3. Verify you're on the blog LISTING page (shows multiple posts, not just one article)
-4. If you land on a single post, look for "Back to Blog", "All Posts", or breadcrumb navigation
-
-=== STEP 3: EXTRACT POSTS ===
-For the 60 most recent posts (typically 2-4 pages of pagination):
-- Extract the TITLE (full post title, clean text)
-- Extract the PUBLISH DATE and convert to YYYY-MM-DD format
-- Stop when you reach 60 posts or run out of posts
-
-CRITICAL NAVIGATION RULES:
-You MUST use the blog page's UI navigation - DO NOT construct or modify URLs manually.
-- PAGINATION: Click on "Next", "Older Posts", page numbers (1, 2, 3...), or "Load More" buttons
-- INFINITE SCROLL: Scroll down to the bottom of the page to trigger more posts to load
-- Wait 2-3 seconds after each navigation action for new posts to load
-- Extract posts from each page before navigating to the next
-- Keep navigating through pages until you have 60 posts OR no more pages exist
-
-Date conversion examples:
-- "December 9, 2024" → "2024-12-09"
-- "9 Dec 2024" → "2024-12-09"
-- "12/09/2024" → "2024-12-09"
-
-=== STEP 4: VALIDATE & FORMAT ===
-Before returning, ensure:
-- All dates are in strict YYYY-MM-DD format
-- No empty or whitespace-only titles
-- No duplicate posts
-- Posts sorted newest to oldest
-- No test/placeholder content
-
-=== OUTPUT FORMAT ===
-Return this exact JSON structure:
-{
-  "blogTitle": "The name of the blog section",
-  "posts": [
-    {"title": "Post Title Here", "publishDate": "2024-12-09"},
-    ...
-  ]
-}
-
-=== ERROR HANDLING ===
-- 404 Errors: DON'T give up! Try all strategies in Step 1 before failing
-- Blog truly not found after all strategies: Return {"blogTitle": null, "posts": []}
-- No dates visible: Check <time> tags, post metadata, or URL patterns like /2024/12/
-- Paywall/login required: Return {"blogTitle": null, "posts": []}
-- Fewer than 60 posts exist: Return all available posts (that's OK!)
-- JavaScript-heavy site not loading: Wait longer (5-10 seconds)
-
-SUCCESS CRITERIA: You must find a page with MULTIPLE blog posts listed, not just one article.
-
-Focus on accuracy and persistence. Try multiple strategies. Don't give up after the first 404!`;
+If no blog found, return: {"blogTitle": null, "posts": []}`;
 
       const targetUrl = domain.startsWith('http') ? domain : `https://${domain}`;
       console.log(`Starting Anchor Browser scrape for ${domain}...`);
