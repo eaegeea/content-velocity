@@ -151,7 +151,7 @@ Focus on accuracy and persistence. Try multiple strategies. Don't give up after 
           url: targetUrl,
           agent: 'browser-use',
           provider: 'gemini',
-          model: 'openai/gpt-oss-120b',
+          model: 'gemini-2.0-flash-exp',
           detect_elements: true,
           human_intervention: false,
           max_steps: 200,
