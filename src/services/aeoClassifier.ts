@@ -77,6 +77,8 @@ export async function classifyBlogTitles(
     throw new Error('XAI_API_KEY environment variable is not set');
   }
 
+  console.log(`XAI_API_KEY configured: ${apiKey ? 'Yes (length: ' + apiKey.length + ')' : 'No'}`);
+
   if (titles.length === 0) {
     return {
       total_titles: 0,
@@ -89,12 +91,13 @@ export async function classifyBlogTitles(
   }
 
   console.log(`Classifying ${titles.length} blog titles for ${domain}...`);
+  console.log(`Using x.ai API endpoint: https://api.x.ai/v1/chat/completions`);
 
   try {
     const response = await axios.post(
       'https://api.x.ai/v1/chat/completions',
       {
-        model: 'grok-4-fast',
+        model: 'grok-beta',
         messages: [
           {
             role: 'system',
@@ -142,8 +145,19 @@ export async function classifyBlogTitles(
       details
     };
   } catch (error: any) {
-    console.error('Error classifying blog titles:', error.message);
-    throw new Error(`Failed to classify blog titles: ${error.message}`);
+    if (error.response) {
+      console.error('x.ai API error:', error.response.status, error.response.data);
+      if (error.response.status === 403) {
+        throw new Error(`x.ai API authentication failed (403). Please check XAI_API_KEY is set correctly.`);
+      }
+      throw new Error(`x.ai API error (${error.response.status}): ${JSON.stringify(error.response.data)}`);
+    } else if (error.request) {
+      console.error('No response from x.ai API:', error.message);
+      throw new Error(`Failed to connect to x.ai API: ${error.message}`);
+    } else {
+      console.error('Error classifying blog titles:', error.message);
+      throw new Error(`Failed to classify blog titles: ${error.message}`);
+    }
   }
 }
 
