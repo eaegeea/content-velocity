@@ -48,13 +48,11 @@ export async function scrapeBlogPosts(domain: string): Promise<ScrapeResult> {
         await delay(delayMs);
       }
 
-      const prompt = `Scrape 60 UNIQUE blog posts from ${domain}
+      const prompt = `You are already at the blog home page. Scrape 60 UNIQUE blog posts.
 
 CRITICAL: Scroll down and navigate pages to find ALL posts!
 
-Step 1: Find blog at ${domain}
-
-Step 2: Extract posts from PAGE 1
+Step 1: Extract posts from PAGE 1
 - SCROLL DOWN to see all posts
 - Try to find dates on the listing page (look for dates near titles)
 - If dates are NOT visible on listing:
@@ -63,7 +61,7 @@ Step 2: Extract posts from PAGE 1
   * Continue for all posts on page 1
 - Extract all titles + dates (format: YYYY-MM-DD)
 
-Step 3: Navigate to PAGE 2
+Step 2: Navigate to PAGE 2
 - SCROLL to bottom of page
 - Look for "Next", "2", "Older Posts", "Load More", "See More", or "→"
 - CLICK the pagination control
@@ -71,7 +69,7 @@ Step 3: Navigate to PAGE 2
 - Check if post titles changed - if yes, extract them
 - If posts changed but URL stayed same, pagination is working (continue!)
 
-Step 4: Repeat for pages 3, 4, 5...
+Step 3: Repeat for pages 3, 4, 5...
 - Keep scrolling to bottom and clicking Next
 - For each new page, extract titles + dates (click into posts if dates not visible)
 - Continue until you have 60 unique posts OR no more pages
