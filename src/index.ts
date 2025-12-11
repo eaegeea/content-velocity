@@ -176,13 +176,19 @@ app.post('/analyze-velocity', async (req, res) => {
       });
     }
 
-    // Extract domain from URL if full URL is provided
+    // Normalize URL - keep full path if provided (e.g., example.com/blog)
     let domain = website_url;
     try {
-      const url = new URL(website_url.startsWith('http') ? website_url : `https://${website_url}`);
-      domain = url.hostname; // Keep www. if present - some sites need it
+      // Add https:// if not present for URL parsing
+      const fullUrl = website_url.startsWith('http') ? website_url : `https://${website_url}`;
+      const url = new URL(fullUrl);
+      
+      // Preserve full URL including path (e.g., example.com/blog)
+      // Remove protocol and trailing slash
+      domain = fullUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
     } catch (e) {
       // If URL parsing fails, use as-is
+      console.log(`URL parsing failed, using as-is: ${website_url}`);
     }
 
     console.log(`Creating job for domain: ${domain}`);
